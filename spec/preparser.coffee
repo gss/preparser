@@ -21,6 +21,7 @@ describe 'GSS preparser', ->
     it 'should include a single CSS part into the array', ->
       chai.expect(statements.length).to.equal 1
       chai.expect(statements[0]).to.be.an 'array'
+      chai.expect(statements[0].length).to.equal 2
       chai.expect(statements[0][0]).to.equal 'css'
 
   describe 'with a simple CCSS rule', ->
@@ -34,6 +35,7 @@ describe 'GSS preparser', ->
     it 'should include a single CCSS part into the array', ->
       chai.expect(statements.length).to.equal 1
       chai.expect(statements[0]).to.be.an 'array'
+      chai.expect(statements[0].length).to.equal 2
       chai.expect(statements[0][0]).to.equal 'ccss'
 
   describe 'with a simple VFL rule', ->
@@ -47,4 +49,5 @@ describe 'GSS preparser', ->
     it 'should include a single VFL part into the array', ->
       chai.expect(statements.length).to.equal 1
       chai.expect(statements[0]).to.be.an 'array'
+      chai.expect(statements[0].length).to.equal 2
       chai.expect(statements[0][0]).to.equal 'vfl'
