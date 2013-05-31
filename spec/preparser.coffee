@@ -99,17 +99,17 @@ describe 'GSS preparser', ->
       chai.expect(statements[0].length).to.equal 2
       chai.expect(statements[0][0]).to.equal 'ccss'
     it 'the second one should be VFL', ->
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'vfl'
+      chai.expect(statements[1]).to.be.an 'array'
+      chai.expect(statements[1].length).to.equal 2
+      chai.expect(statements[1][0]).to.equal 'vfl'
     it 'the third one should be GTL', ->
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'gtl'
+      chai.expect(statements[2]).to.be.an 'array'
+      chai.expect(statements[2].length).to.equal 2
+      chai.expect(statements[2][0]).to.equal 'gtl'
     it 'the fourth one should be CSS', ->
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'css'
+      chai.expect(statements[3]).to.be.an 'array'
+      chai.expect(statements[3].length).to.equal 2
+      chai.expect(statements[3][0]).to.equal 'css'
 
   describe 'with mixed CSS, CCSS, VFL, and GTL. CSS first', ->
     source = """
@@ -138,14 +138,14 @@ describe 'GSS preparser', ->
       chai.expect(statements[0].length).to.equal 2
       chai.expect(statements[0][0]).to.equal 'css'
     it 'the second one should be CCSS', ->
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'ccss'
+      chai.expect(statements[1]).to.be.an 'array'
+      chai.expect(statements[1].length).to.equal 2
+      chai.expect(statements[1][0]).to.equal 'ccss'
     it 'the third one should be VFL', ->
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'vfl'
+      chai.expect(statements[2]).to.be.an 'array'
+      chai.expect(statements[2].length).to.equal 2
+      chai.expect(statements[2][0]).to.equal 'vfl'
     it 'the fourth one should be GTL', ->
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'gtl'
+      chai.expect(statements[3]).to.be.an 'array'
+      chai.expect(statements[3].length).to.equal 2
+      chai.expect(statements[3][0]).to.equal 'gtl'
