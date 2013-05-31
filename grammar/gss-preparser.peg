@@ -29,6 +29,7 @@ start
 
 statement
   = ccss
+  / vfl
   / css
 
 ccss
@@ -36,6 +37,10 @@ ccss
 
 ccssOp
   = ">=" / "==" / "<="
+
+vfl
+  = vfl:("@-gss-" ("horizontal" / "vertical" / "h" / "v") anytoend)    { return ['vfl', parser.flatten(vfl).join("").trim()]; }
+
 
 css
   = css:(.)+  {return ['css', css.join("")]}
