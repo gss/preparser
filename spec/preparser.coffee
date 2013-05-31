@@ -35,3 +35,16 @@ describe 'GSS preparser', ->
       chai.expect(statements.length).to.equal 1
       chai.expect(statements[0]).to.be.an 'array'
       chai.expect(statements[0][0]).to.equal 'ccss'
+
+  describe 'with a simple VFL rule', ->
+    source = """
+    @-gss-horizontal |-[#box1]-[#button1]-| in(#dialog);
+    """
+    statements = null
+    it 'should produce a statement array', ->
+      statements = parser.parse source
+      chai.expect(statements).to.be.an 'array'
+    it 'should include a single VFL part into the array', ->
+      chai.expect(statements.length).to.equal 1
+      chai.expect(statements[0]).to.be.an 'array'
+      chai.expect(statements[0][0]).to.equal 'vfl'
