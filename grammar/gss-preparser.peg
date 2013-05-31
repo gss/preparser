@@ -22,30 +22,51 @@
     }
     return result;
   }
+  parser.results = []
+  parser.stringify = function (array) {
+    return flatten(array).join("").trim()
+  }
+
 }
 
 start
-  = (statement)+
+  = LineTerminator* s:(statement)+  {return s}
 
 statement
+  = gssBlob
+  / cssBlock 
+  / cssLine
+
+gssBlob
   = ccss
   / vfl
-  / css
+  / gtl
 
 ccss
-  = ccss:(char+ _ ccssOp anytoend)  { return ['ccss', parser.flatten(ccss).join("").trim()]; }
+  = ccss:(_ char+ _ ccssOp anytoend)  { return ['ccss', parser.stringify(ccss)]; }
 
 ccssOp
   = ">=" / "==" / "<="
 
 vfl
-  = vfl:("@-gss-" ("horizontal" / "vertical" / "h" / "v") anytoend)    { return ['vfl', parser.flatten(vfl).join("").trim()]; }
+  = vfl:( _ "@-gss-" ("horizontal" / "vertical" / "h" / "v") anytoend)    { return ['vfl', parser.stringify(vfl)]; }
 
+gtl
+  = gtl:(_ "@-gss-" ("layout" / "template") multitoend)    { return ['gtl', parser.stringify(gtl)]; }
 
-css
-  = css:(.)+  {return ['css', css.join("")]}
+cssBlock
+  = block:(anychar+ multitoend)    { return ['css', parser.stringify(block)]; }
+ 
+cssLine
+  = line:(anychar+ anytoend)   { return ['css', parser.stringify(line)]; }
+
+comment
+  = _ "/*" [^*]* "*"+ ([^/*] [^*]* "*"+)* "/" _ LineTerminator*  {return ""}
+
+//css
+//  = css:(.)+  {return ['css', parser.stringify(css)]}
 _
-  = (" ")*
+  = (" ")* 
 
 __
   = (" ")+
@@ -53,8 +74,15 @@ __
 char
   = [a-zA-Z0-9_#.-]
 
+anychar
+  = [a-zA-Z0-9 .,#:{}@+?!^=()_\-$*/\\]
+
+multitoend
+  = [^}]* "}" _ LineTerminator*
+
 anytoend
   = [^;]* ";" _ LineTerminator*
 
 LineTerminator
   = [\n\r\u2028\u2029]
+  / comment 
