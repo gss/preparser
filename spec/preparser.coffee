@@ -15,6 +15,6 @@ describe 'GSS preparser', ->
     }
     """
     statements = null
-    it 'should produce a statement JSON object', ->
+    it 'should produce a statement array', ->
       statements = parser.parse source
-      chai.expect(statements).to.be.an 'object'
+      chai.expect(statements).to.be.an 'array'
