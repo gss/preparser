@@ -51,3 +51,22 @@ describe 'GSS preparser', ->
       chai.expect(statements[0]).to.be.an 'array'
       chai.expect(statements[0].length).to.equal 2
       chai.expect(statements[0][0]).to.equal 'vfl'
+
+  describe 'with a simple GTL rule', ->
+    source = """
+    @-gss-layout "frontpageLayout" {
+      grid: "aaab"
+            "aaab"
+            "cccc";
+      place-a: "#box1" "#box1";
+    }
+    """
+    statements = null
+    it 'should produce a statement array', ->
+      statements = parser.parse source
+      chai.expect(statements).to.be.an 'array'
+    it 'should include a single GTL part into the array', ->
+      chai.expect(statements.length).to.equal 1
+      chai.expect(statements[0]).to.be.an 'array'
+      chai.expect(statements[0].length).to.equal 2
+      chai.expect(statements[0][0]).to.equal 'gtl'
