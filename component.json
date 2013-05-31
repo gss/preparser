@@ -1,0 +1,9 @@
+{
+  "name": "gss-preparser",
+  "description": "GSS preparser",
+  "version": "0.0.1",
+  "scripts": [
+    "lib/gss-preparser.js"
+  ],
+  "main": "lib/gss-preparser.js"
+}
