@@ -70,3 +70,43 @@ describe 'GSS preparser', ->
       chai.expect(statements[0]).to.be.an 'array'
       chai.expect(statements[0].length).to.equal 2
       chai.expect(statements[0][0]).to.equal 'gtl'
+
+  describe 'with mixed CSS, CCSS, VFL, and GTL', ->
+    source = """
+    /* Here we define some constraints */
+    #box1.width >= #box2.width;
+    @-gss-horizontal |-[#box1]-[#button1]-| in(#dialog);
+    /* And then we lay it all out */
+    @-gss-layout "frontpageLayout" {
+      grid: "aaab"
+            "aaab"
+            "cccc";
+      place-a: "#box1" "#box1";
+    }
+    /* Finally, make it look nice */
+    h1 {
+      color: red;
+    }
+    """
+    statements = null
+    it 'should produce a statement array', ->
+      statements = parser.parse source
+      chai.expect(statements).to.be.an 'array'
+    it 'it should include four statements', ->
+      chai.expect(statements.length).to.equal 4
+    it 'the first one should be CCSS', ->
+      chai.expect(statements[0]).to.be.an 'array'
+      chai.expect(statements[0].length).to.equal 2
+      chai.expect(statements[0][0]).to.equal 'ccss'
+    it 'the second one should be VFL', ->
+      chai.expect(statements[0]).to.be.an 'array'
+      chai.expect(statements[0].length).to.equal 2
+      chai.expect(statements[0][0]).to.equal 'vfl'
+    it 'the third one should be GTL', ->
+      chai.expect(statements[0]).to.be.an 'array'
+      chai.expect(statements[0].length).to.equal 2
+      chai.expect(statements[0][0]).to.equal 'gtl'
+    it 'the fourth one should be CSS', ->
+      chai.expect(statements[0]).to.be.an 'array'
+      chai.expect(statements[0].length).to.equal 2
+      chai.expect(statements[0][0]).to.equal 'css'
