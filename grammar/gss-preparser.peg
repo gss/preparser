@@ -1,0 +1,31 @@
+
+start
+  = (statement toend)+ 
+
+statement
+  = ccss
+  / css
+
+ccss
+  = ccss:(char+ _ ccssOp _ char+)  {return ['ccss',ccss]}
+
+ccssOp
+  = ">=" / "==" / "<="
+
+css
+  = css:(.)+  {return ['css', css.join("")]}
+
+_
+  = (" ")*
+
+__
+  = (" ")+
+
+char
+  = [a-zA-Z0-9#.]
+
+toend
+  = ";"
+
+LineTerminator
+  = _ [\n\r\u2028\u2029]?
