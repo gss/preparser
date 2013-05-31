@@ -18,3 +18,20 @@ describe 'GSS preparser', ->
     it 'should produce a statement array', ->
       statements = parser.parse source
       chai.expect(statements).to.be.an 'array'
+    it 'should include a single CSS part into the array', ->
+      chai.expect(statements.length).to.equal 1
+      chai.expect(statements[0]).to.be.an 'array'
+      chai.expect(statements[0][0]).to.equal 'css'
+
+  describe 'with a simple CCSS rule', ->
+    source = """
+    #box1.width >= #box2.width;
+    """
+    statements = null
+    it 'should produce a statement array', ->
+      statements = parser.parse source
+      chai.expect(statements).to.be.an 'array'
+    it 'should include a single CCSS part into the array', ->
+      chai.expect(statements.length).to.equal 1
+      chai.expect(statements[0]).to.be.an 'array'
+      chai.expect(statements[0][0]).to.equal 'ccss'
