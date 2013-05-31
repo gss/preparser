@@ -1,20 +1,44 @@
+{
+  var parser, flatten; 
+
+  parser = this;
+
+  String.prototype.trim = String.prototype.trim || function trim() { return this.replace(/^\s\s*/, '').replace(/\s\s*$/, ''); };
+
+  flatten = parser.flatten = function (array, isShallow) {
+    var index = -1,
+      length = array ? array.length : 0,
+      result = [];
+
+    while (++index < length) {
+      var value = array[index];
+
+      if (value instanceof Array) {
+        Array.prototype.push.apply(result, isShallow ? value : flatten(value));
+      }
+      else {
+        result.push(value);
+      }
+    }
+    return result;
+  }
+}
 
 start
-  = (statement toend)+ 
+  = (statement)+
 
 statement
   = ccss
   / css
 
 ccss
-  = ccss:(char+ _ ccssOp _ char+)  {return ['ccss',ccss]}
+  = ccss:(char+ _ ccssOp anytoend)  { return ['ccss', parser.flatten(ccss).join("").trim()]; }
 
 ccssOp
   = ">=" / "==" / "<="
 
 css
   = css:(.)+  {return ['css', css.join("")]}
-
 _
   = (" ")*
 
@@ -22,10 +46,10 @@ __
   = (" ")+
 
 char
-  = [a-zA-Z0-9#.]
+  = [a-zA-Z0-9_#.-]
 
-toend
-  = ";"
+anytoend
+  = [^;]* ";" _ LineTerminator*
 
 LineTerminator
-  = _ [\n\r\u2028\u2029]?
+  = [\n\r\u2028\u2029]
