@@ -44,6 +44,7 @@ gssBlob
 
 ccss
   = ccss:(_ char+ _ ccssOp anytoend)  { return ['ccss', parser.stringify(ccss)]; }
+  / stay:( _ "@" ("-gss-stay" / "stay") anytoend)    { return ['ccss', parser.stringify(stay)]; }
 
 ccssOp
   = ">=" / "==" / "<="
