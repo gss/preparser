@@ -50,7 +50,7 @@ ccssOp
   = ">=" / "==" / "<="
 
 vfl
-  = vfl:( _ "@-gss-" ("horizontal" / "vertical" / "h" / "v") anytoend)    { return ['vfl', parser.stringify(vfl)]; }
+  = vfl:( _ ("@-gss-" / "@") ("horizontal" / "vertical" / "h" / "v") anytoend)    { return ['vfl', parser.stringify(vfl)]; }
 
 gtl
   = gtl:(_ "@-gss-" ("layout" / "template") multitoend)    { return ['gtl', parser.stringify(gtl)]; }
