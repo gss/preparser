@@ -54,7 +54,7 @@ describe 'GSS preparser', ->
 
   describe 'with a simple VFL rule', ->
     source = """
-    @-gss-horizontal |-[#box1]-[#button1]-| in(#dialog);
+    @horizontal |-[#box1]-[#button1]-| in(#dialog);
     """
     statements = null
     it 'should produce a statement array', ->
@@ -89,7 +89,7 @@ describe 'GSS preparser', ->
     source = """
     /* Here we define some constraints */
     #box1.width >= #box2.width;
-    @-gss-horizontal |-[#box1]-[#button1]-| in(#dialog);
+    @horizontal |-[#box1]-[#button1]-| in(#dialog);
     /* And then we lay it all out */
     @-gss-layout "frontpageLayout" {
       grid: "aaab"
@@ -132,7 +132,7 @@ describe 'GSS preparser', ->
     }
     /* Here we define some constraints */
     #box1.width >= #box2.width;
-    @-gss-horizontal |-[#box1]-[#button1]-| in(#dialog);
+    @horizontal |-[#box1]-[#button1]-| in(#dialog);
     /* And then we lay it all out */
     @-gss-layout "frontpageLayout" {
       grid: "aaab"
