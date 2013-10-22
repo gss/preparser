@@ -68,10 +68,10 @@ comment
 //css
 //  = css:(.)+  {return ['css', parser.stringify(css)]}
 _
-  = (" ")* 
+  = ([ \t])* 
 
 __
-  = (" ")+
+  = ([ \t])+
 
 char
   = [a-zA-Z0-9_#.\[\]\-]
