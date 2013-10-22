@@ -27,8 +27,12 @@ module.exports = ->
 
     # Automated recompilation and testing when developing
     watch:
-      files: ['spec/*.coffee', 'grammar/*.peg']
-      tasks: ['test']
+      build:
+        files: ['spec/*.coffee', 'grammar/*.peg']
+        tasks: ['build']
+      test:
+        files: ['spec/*.coffee', 'grammar/*.peg']
+        tasks: ['test']
 
     # BDD tests on Node.js
     cafemocha:
@@ -61,6 +65,6 @@ module.exports = ->
   @loadNpmTasks 'grunt-mocha-phantomjs'
   @loadNpmTasks 'grunt-contrib-watch'
 
-  @registerTask 'build', ['peg', 'component_build', 'uglify']
-  @registerTask 'test', ['build', 'coffee', 'cafemocha', 'mocha_phantomjs']
+  @registerTask 'build', ['peg', 'coffee', 'component_build', 'uglify']
+  @registerTask 'test', ['build', 'cafemocha', 'mocha_phantomjs']
   @registerTask 'default', ['build']

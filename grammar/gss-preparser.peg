@@ -31,6 +31,7 @@
 
 start
   = LineTerminator* s:(statement)+  {return s}
+  / _
 
 statement
   = gssBlob
@@ -85,5 +86,5 @@ anytoend
   = [^;]* ";" _ LineTerminator*
 
 LineTerminator
-  = [\n\r\u2028\u2029]
+  = [\n\r\u2028\u2029] _
   / comment 

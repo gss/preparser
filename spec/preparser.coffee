@@ -19,24 +19,72 @@ describe 'GSS preparser', ->
       statements = parser.parse source
       chai.expect(statements).to.be.an 'array'
     it 'should include a single CSS part into the array', ->
-      chai.expect(statements.length).to.equal 1
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'css'
+      chai.expect(statements).to.eql [
+        ['css',"""
+          h1 {
+            color: red;
+          }""" 
+        ]
+      ]
+        
 
-  describe 'with a simple CCSS rule', ->
+  describe 'with a top-level CCSS rule', ->
     source = """
-    #box1.width >= #box2.width;
+    #box1[width] >= #box2[width];
     """
     statements = null
     it 'should produce a statement array', ->
       statements = parser.parse source
       chai.expect(statements).to.be.an 'array'
     it 'should include a single CCSS part into the array', ->
-      chai.expect(statements.length).to.equal 1
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'ccss'
+      chai.expect(statements).to.eql [
+        ['ccss',"""
+          #box1[width] >= #box2[width];
+          """ 
+        ]
+      ]
+  
+  describe 'CCSS with janky spaces', ->
+    source = """
+    #ed[top] == 0;
+        
+      .box[width] >= 100 <= .box[height];
+    """
+    statements = null
+    it 'should produce a statement array', ->
+      statements = parser.parse source
+      chai.expect(statements).to.be.an 'array'
+    it 'should include a single CSS part into the array', ->
+      chai.expect(statements).to.eql [
+        ['ccss',"""
+          #ed[top] == 0;
+          """ 
+        ]
+        ['ccss',"""
+          .box[width] >= 100 <= .box[height];
+          """ 
+        ]
+      ]
+  
+  ###
+  describe 'with contextual CCSS rule', ->
+    source = """
+    #box1 {
+      width: >= 100 + ::window[width]/10 !strong;
+    }
+    """
+    statements = null
+    it 'should produce a statement array', ->
+      statements = parser.parse source
+      chai.expect(statements).to.be.an 'array'
+    it 'should include a single CCSS part into the array', ->
+      chai.expect(statements).to.eql [
+        ['ccss',"""
+          ::this[width] >= 100 + ::window[width]/10 this(#box1) !strong;
+          """ 
+        ]
+      ]
+  ###
 
   describe 'with a CCSS stay rule', ->
     source = """
@@ -130,10 +178,16 @@ describe 'GSS preparser', ->
     h1 {
       color: red;
     }
+    
     /* Here we define some constraints */
+    
     #box1.width >= #box2.width;
+    
     @horizontal |-[#box1]-[#button1]-| in(#dialog);
+    
     /* And then we lay it all out */
+    
+    
     @-gss-layout "frontpageLayout" {
       grid: "aaab"
             "aaab"
