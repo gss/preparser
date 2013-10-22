@@ -46,9 +46,11 @@ describe 'GSS preparser', ->
   
   describe 'CCSS with janky spaces', ->
     source = """
+    
     #ed[top] == 0;
         
       .box[width] >= 100 <= .box[height];
+      
     """
     statements = null
     it 'should produce a statement array', ->
@@ -85,6 +87,7 @@ describe 'GSS preparser', ->
         ]
       ]
   ###
+
 
   describe 'with a CCSS stay rule', ->
     source = """
