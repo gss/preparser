@@ -68,10 +68,16 @@ comment
 //css
 //  = css:(.)+  {return ['css', parser.stringify(css)]}
 _
-  = ([ \t\r\n])* 
+  = space* 
 
 __
-  = ([ \t\r\n])+
+  = space+
+  
+space
+  = " "
+  / [\t]
+  / [\u00A0] //NO-BREAK SPACE
+  
 
 char
   = [a-zA-Z0-9_#.\[\]\-]
