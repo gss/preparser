@@ -220,3 +220,29 @@ describe 'GSS preparser', ->
       chai.expect(statements[3]).to.be.an 'array'
       chai.expect(statements[3].length).to.equal 2
       chai.expect(statements[3][0]).to.equal 'gtl'
+  
+  describe 'with js layout hooks', ->
+    source = """
+    @for-each .box ``` 
+      function(el) {
+        alert('do something!');
+      }
+    ```;
+    @horizontal .box gap(10);
+    """
+    statements = null
+    it 'should produce a statement array', ->
+      statements = parser.parse source
+      chai.expect(statements).to.be.an 'array'
+    it 'should include a single CSS part into the array', ->
+      chai.expect(statements).to.eql [
+        ['ccss',"""
+          @for-each .box ``` 
+            function(el) {
+              alert('do something!');
+            }
+          ```;
+          """ 
+        ],
+        ['vfl', '@horizontal .box gap(10);']
+      ]
