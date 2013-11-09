@@ -246,3 +246,16 @@ describe 'GSS preparser', ->
         ],
         ['vfl', '@horizontal .box gap(10);']
       ]
+  
+  describe 'with chains', ->
+    source = """
+    @chain .big-boxes gap(+[199]!strong);
+    """
+    statements = null
+    it 'should produce a statement array', ->
+      statements = parser.parse source
+      chai.expect(statements).to.be.an 'array'
+    it 'should include a single CSS part into the array', ->
+      chai.expect(statements).to.eql [
+        ['ccss', '@chain .big-boxes gap(+[199]!strong);']
+      ]

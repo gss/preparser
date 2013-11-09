@@ -45,8 +45,10 @@ gssBlob
 
 ccss
   = ccss:(_ char+ _ ccssOp anytoend)  { return ['ccss', parser.stringify(ccss)]; }
-  / stay:( _ "@" ("-gss-stay" / "stay") anytoend)    { return ['ccss', parser.stringify(stay)]; }
+  / stay:( _ "@" ("-gss-")? "stay" anytoend)    { return ['ccss', parser.stringify(stay)]; }
+  / chain:( _ "@" ("-gss-")? "chain" anytoend)    { return ['ccss', parser.stringify(chain)]; }
   / forlooper:( _ "@" ("-gss-")? ("for-each" / "for-all") [^`]+ "```" [^`]+ "```" anytoend) { return ['ccss', parser.stringify(forlooper)]; }
+  
 
 ccssOp
   = ">=" / "==" / "<="
