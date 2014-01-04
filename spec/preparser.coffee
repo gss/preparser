@@ -136,7 +136,7 @@ describe 'GSS preparser ~', ->
       #box1[width] >= #box2[width] !weak;
       """,
       [
-        {type:'constraint', cssText:'#box1[width] >= #box2[width] !weak name(c1);'}
+        {type:'constraint', cssText:'#box1[width] >= #box2[width] !weak;'}
       ]
     
     test 'with a simple CCSS rule with an explicit id',
@@ -156,7 +156,7 @@ describe 'GSS preparser ~', ->
       
       """,
       [
-        {type:'constraint', cssText:"#ed[top] == 0 name(c1);"}
+        {type:'constraint', cssText:"#ed[top] == 0;"}
         {type:'constraint', cssText:".box[width] >= 100 <= .box[height] name(box-size) !strong;"}
       ]
   
@@ -180,7 +180,7 @@ describe 'GSS preparser ~', ->
               type:'ruleset'
               selectors: ['.post']
               rules: [
-                {type:'constraint', cssText:'::[height] == ::parent[height] name(c1);'}
+                {type:'constraint', cssText:'::[height] == ::parent[height];'}
                 {type:'constraint', cssText:'::[height] >= ::parent[height] name(blah);'}
               ]
             }
@@ -194,7 +194,7 @@ describe 'GSS preparser ~', ->
       @-gss-stay #box[width], [grid-height];
       """,
       [
-        {type:'constraint', cssText:"@-gss-stay #box[width], [grid-height] name(c1);"}
+        {type:'constraint', cssText:"@-gss-stay #box[width], [grid-height];"}
       ]
   
   
@@ -247,7 +247,7 @@ describe 'GSS preparser ~', ->
       expect(statements).to.be.an 'array'
     it 'should include a single CSS part into the array', ->
       expect(statements).to.eql [
-        {type:'constraint',cssText:'@chain .big-boxes gap(+[199]!strong) name(c2);'}
+        {type:'constraint',cssText:'@chain .big-boxes gap(+[199]!strong);'}
       ]
   
   
@@ -275,20 +275,20 @@ describe 'GSS preparser ~', ->
           name: 'media'
           terms: 'screen and (device-aspect-ratio: 16/9), screen and (device-aspect-ratio: 16/10)'
           rules: [
-            {type:'constraint',cssText:"h1[width] >= h2[width] name(c1);"}
+            {type:'constraint',cssText:"h1[width] >= h2[width];"}
             {
               type: "ruleset"
               selectors: ['h1']
               rules: [
                 {type:'directive',name:"vertical",terms:".word"}
                 {type:'style', key:'color', val: 'red'}
-                {type:'constraint',cssText:'::[height] == ::parent[height] name(c2);'}
+                {type:'constraint',cssText:'::[height] == ::parent[height];'}
                 {                  
                   type: "ruleset"
                   selectors: ['span','em']
                   rules: [
                     {type:'style', key:'color', val: 'blue'}
-                    {type:'constraint',cssText:'[gap] >= ::window[width]/10 name(c3);'}
+                    {type:'constraint',cssText:'[gap] >= ::window[width]/10;'}
                   ]
                 }
               ]
@@ -329,7 +329,7 @@ describe 'GSS preparser ~', ->
          },
          {
             "type": "constraint",
-            "cssText": "60 =< [col-size] <= ::window / 12 name(c1);"
+            "cssText": "60 =< [col-size] <= ::window / 12;"
          },
          {
             "type": "ruleset",
@@ -379,7 +379,7 @@ describe 'GSS preparser ~', ->
                         "rules": [
                            {
                               "type": "constraint",
-                              "cssText": "::[height] <= ::window[height] / 2 !strong name(c2);"
+                              "cssText": "::[height] <= ::window[height] / 2 !strong;"
                            },
                            {
                               "type": "style",
@@ -407,7 +407,7 @@ describe 'GSS preparser ~', ->
       }
       """,
       [
-        {type:'constraint',cssText:"#box1.width >= #box2.width name(c1);"}
+        {type:'constraint',cssText:"#box1.width >= #box2.width;"}
         {type:'directive', name:'horizontal', terms:"|-[#box1]-[#button1]-| in(#dialog)"}
         {type:'ruleset', selectors:['h1'],rules:[{type:'style',key:'color',val:'red'}]}
       ]
@@ -429,7 +429,7 @@ describe 'GSS preparser ~', ->
       """,
       [
         {type:'ruleset', selectors:['h1'],rules:[{type:'style',key:'color',val:'red'}]}
-        {type:'constraint',cssText:"#box1.width >= #box2.width name(c1);"}
+        {type:'constraint',cssText:"#box1.width >= #box2.width;"}
         {type:'directive', name:'horizontal', terms:"|-[#box1]-[#button1]-| in(#dialog)"}        
       ]
   

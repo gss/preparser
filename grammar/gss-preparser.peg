@@ -94,16 +94,16 @@ gssBlob
 
 
 ccss "CCSS"
-  = ccss:(_ char+ _ ccssOp ToEndIdInjector)  { 
+  = ccss:(_ char+ _ ccssOp anytoend)  { 
     return {type:'constraint', cssText: p.stringify(ccss)}; 
   }
-  / stay:( _ "@" ("-gss-")? "stay" ToEndIdInjector)    { 
+  / stay:( _ "@" ("-gss-")? "stay" anytoend)    { 
     return {type:'constraint', cssText: p.stringify(stay)}; 
   }
-  / chain:( _ "@" ("-gss-")? "chain" ToEndIdInjector)    { 
+  / chain:( _ "@" ("-gss-")? "chain" anytoend)    { 
     return {type:'constraint', cssText: p.stringify(chain)}; 
   }
-  / forlooper:( _ "@" ("-gss-")? ("for-each" / "for-all") [^`]+ "```" [^`]+ "```" ToEndIdInjector) { 
+  / forlooper:( _ "@" ("-gss-")? ("for-each" / "for-all") [^`]+ "```" [^`]+ "```" anytoend) { 
     return {type:'constraint', cssText: p.stringify(forlooper)}; 
   }
   
@@ -112,7 +112,7 @@ ccssOp
   = ">=" / "==" / "<=" / "=>" / "=<"
 
 ContextualCCSSLine "Contextual CCSS Statement"
-  = _ prop:[a-zA-Z0-9\-_$]+ ":" _ op:ccssOp tail:ToEndIdInjector  {
+  = _ prop:[a-zA-Z0-9\-_$]+ ":" _ op:ccssOp tail:anytoend  {
       return {type:'constraint', cssText: "::["+p.trim(prop)+"]"+" "+op+" "+p.stringify(tail)};
     }
 
@@ -120,7 +120,7 @@ cssLine "CSS Line"
    = _ key:TextToColon val:TextToSemicolon { return {type:'style', key:key, val:val}; }
 
 vfl
-  = vfl:( _ ("@-gss-" / "@") ("horizontal" / "vertical" / "h" / "v") ToEndIdInjector)    { return ['vfl', parser.stringify(vfl)]; }
+  = vfl:( _ ("@-gss-" / "@") ("horizontal" / "vertical" / "h" / "v") anytoend)    { return ['vfl', parser.stringify(vfl)]; }
 
 gtl
   = gtl:(_ "@-gss-" ("layout" / "template") multitoend)    { return ['gtl', parser.stringify(gtl)]; }
