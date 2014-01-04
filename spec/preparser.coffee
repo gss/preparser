@@ -171,7 +171,7 @@ describe 'GSS preparser ~', ->
         
       }
       """,
-      [
+      [ 
         {
           type:'ruleset'
           selectors: ['#main']
