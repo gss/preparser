@@ -1,7 +1,23 @@
 {
-  var parser, flatten; 
-
-  parser = this;
+  var p, parser, flatten, idPrefix; 
+  p = parser = this;
+  
+  
+  if (p.blockCount == null) { // shared state for lifetime of parser
+    p.blockCount = 0;
+  }   
+  p.bid = function () {
+    p.blockCount++;
+    return p.blockCount;
+  }
+  
+  if (p.constraintCount == null) { // shared state for lifetime of parser
+    p.constraintCount = 0;
+  }   
+  p.cid = function () {
+    p.constraintCount++;
+    return "c"+p.constraintCount;
+  }    
 
   String.prototype.trim = String.prototype.trim || function trim() { return this.replace(/^\s\s*/, '').replace(/\s\s*$/, ''); };
 
@@ -22,50 +38,132 @@
     }
     return result;
   }
-  parser.results = []
-  parser.stringify = function (array) {
-    return flatten(array).join("").trim()
-  }
+
+  p.results = [];
+
+  p.stringify = function (array) {
+    return flatten(array).join("").trim();
+  };
+
+  p.trim = function (x) {
+    if (typeof x === "string") {return x.trim();}
+    if (x instanceof Array) {return x.join("").trim();}
+    return ""
+  };
+  
+  parser.error = function (m,l,c) {
+    if (!!l && !!c) {
+      m = m + " {line:" + l + ", col:" + c + "}";
+    }
+    console.error(m);
+    return m;
+  };
 
 }
 
 start
-  = LineTerminator* s:(statement)+  {return s}
+  = statements
+
+statements
+  = LineTerminator* s:(statement)+ LineTerminator* {return s}
   / _
 
-statement
-  = gssBlob
-  / cssBlock 
-  / cssLine
+statement "Statement"
+  = Ruleset  
+  / gssBlob
+  / Directive 
+  / cssLine  
+
+nestedStatement "Nested Statement"
+  = Ruleset    
+  / gssBlob
+  / Directive 
+  / ContextualCCSSLine
+  / cssLine    
+
+nestedStatements
+  = LineTerminator* s:(nestedStatement)* LineTerminator* {return s}
+  / _
+
 
 gssBlob
-  = ccss
-  / vfl
-  / gtl
+  = ccss  
 
-ccss
-  = ccss:(_ char+ _ ccssOp anytoend)  { return ['ccss', parser.stringify(ccss)]; }
-  / stay:( _ "@" ("-gss-")? "stay" anytoend)    { return ['ccss', parser.stringify(stay)]; }
-  / chain:( _ "@" ("-gss-")? "chain" anytoend)    { return ['ccss', parser.stringify(chain)]; }
-  / forlooper:( _ "@" ("-gss-")? ("for-each" / "for-all") [^`]+ "```" [^`]+ "```" anytoend) { return ['ccss', parser.stringify(forlooper)]; }
+  // gtl
+  // vfl
+
+
+ccss "CCSS"
+  = ccss:(_ char+ _ ccssOp ToEndIdInjector)  { 
+    return {type:'constraint', cssText: p.stringify(ccss)}; 
+  }
+  / stay:( _ "@" ("-gss-")? "stay" ToEndIdInjector)    { 
+    return {type:'constraint', cssText: p.stringify(stay)}; 
+  }
+  / chain:( _ "@" ("-gss-")? "chain" ToEndIdInjector)    { 
+    return {type:'constraint', cssText: p.stringify(chain)}; 
+  }
+  / forlooper:( _ "@" ("-gss-")? ("for-each" / "for-all") [^`]+ "```" [^`]+ "```" ToEndIdInjector) { 
+    return {type:'constraint', cssText: p.stringify(forlooper)}; 
+  }
   
 
 ccssOp
-  = ">=" / "==" / "<="
+  = ">=" / "==" / "<=" / "=>" / "=<"
+
+ContextualCCSSLine "Contextual CCSS Statement"
+  = _ prop:[a-zA-Z0-9\-_$]+ ":" _ op:ccssOp tail:ToEndIdInjector  {
+      return {type:'constraint', cssText: "::["+p.trim(prop)+"]"+" "+op+" "+p.stringify(tail)};
+    }
+
+cssLine "CSS Line"
+   = _ key:TextToColon val:TextToSemicolon { return {type:'style', key:key, val:val}; }
 
 vfl
-  = vfl:( _ ("@-gss-" / "@") ("horizontal" / "vertical" / "h" / "v") anytoend)    { return ['vfl', parser.stringify(vfl)]; }
+  = vfl:( _ ("@-gss-" / "@") ("horizontal" / "vertical" / "h" / "v") ToEndIdInjector)    { return ['vfl', parser.stringify(vfl)]; }
 
 gtl
   = gtl:(_ "@-gss-" ("layout" / "template") multitoend)    { return ['gtl', parser.stringify(gtl)]; }
 
 cssBlock
   = block:(anychar+ multitoend)    { return ['css', parser.stringify(block)]; }
- 
-cssLine
-  = line:(anychar+ anytoend)   { return ['css', parser.stringify(line)]; }
 
-comment
+Ruleset "Ruleset"
+  = _ $:SelectorList s:BlockedStatements {
+    return {type:'ruleset',selectors:$,rules:s};
+  }
+  
+Directive "Directive"
+  = name:DirectiveName terms:[^@{};]* s:BlockedStatements  {
+    var o;
+    o = {type:'directive',name:p.trim(name),terms:p.trim(terms)};
+    if (!!s) {o.rules = s;}
+    return o;
+  }
+  / name:DirectiveName terms:TextToSemicolon {
+    var o;
+    o = {type:'directive',name:p.trim(name),terms:p.trim(terms)};    
+    return o;
+  }
+
+DirectiveName "Directive Name"
+  = _ "@" name:[a-zA-Z0-9\-\_$]+ {return p.trim(name);}
+
+BlockedStatements "Statement Blocks"
+  = _  "{" _ s:nestedStatements _ "}" _ LineTerminator* {return s;}
+
+SelectorList "SelectorList"
+  = $:Selector $s:SelectorListEnd* {return [$].concat($s)}
+
+SelectorListEnd
+  = _ "," $:Selector {return $}
+
+Selector "Selector"
+  = _ $:[^@{}\[\],;]+ _ {return $.join("").trim()}
+
+
+
+comment "Comment"
   = _ "/*" [^*]* "*"+ ([^/*] [^*]* "*"+)* "/" _ LineTerminator*  {return ""}
 
 //css
@@ -76,24 +174,38 @@ _
 __
   = space+
   
-space
+space "Space"
   = " "
   / [\t]
   / [\u00A0] //NO-BREAK SPACE
   
 
-char
+char "char"
   = [a-zA-Z0-9_#.\[\]\-]
 
 anychar
-  = [a-zA-Z0-9 .,#:{}@+?!^=()_\-$*/\\]
+  = [a-zA-Z0-9 .,#:+?!^=()_\-$*/\\]
 
-multitoend
+multitoend "multitoend"
   = [^}]* "}" _ LineTerminator*
 
-anytoend
-  = [^;]* ";" _ LineTerminator*
+anytoend "anytoend"
+  = [^;]* ";" _ LineTerminator* 
 
-LineTerminator
+TextToColon "TextToColon"
+  = text:[^:{}]+ ":" _ LineTerminator* {return p.stringify(text)}
+
+TextToSemicolon "TextToSemicolon"
+  = text:[^;{}]+ ";" _ LineTerminator* {return p.stringify(text)}
+
+_terminators
+  = _ LineTerminator* 
+  
+ToEndIdInjector "ToEndIdInjector"
+  = x:(!" name(" [^";"])* ";"  _terminators {return " " + p.stringify(x) + " name(" + p.cid() + ");";}  // inject Name
+  / x:(!" name()" [^";"])* ";" _terminators {p.cid(); return " " + p.stringify(x) + ";";} // valid name
+  / x:[^;]* ";"              _terminators {return     p.error("Invalid Name, must have value",line,column);} // invalid name
+
+LineTerminator "LineTerminator"
   = ([\n\r\u2028\u2029] / "\r\n") _
   / comment 

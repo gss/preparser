@@ -4,248 +4,238 @@ if typeof process is 'object' and process.title is 'node'
 else
   parser = require 'gss-preparser'
 
-describe 'GSS preparser', ->
+expect = chai.expect
+
+
+test = (name,source,target) ->  
+  statements = null  
+  describe name, ->    
+    it '/ should parse', ->
+      parser.constraintCount = 0
+      parser.blockCount = 0
+      statements = parser.parse source
+      expect(statements).to.be.an 'array'
+    it '/ should parse correctly', ->
+      expect(statements).to.eql target
+  
+
+describe 'GSS preparser ~', ->
+  
   it 'should provide a parse method', ->
-    chai.expect(parser.parse).to.be.a 'function'
-
-  describe 'with simple CSS rule', ->
-    source = """
-    h1 {
-      color: red;
-    }
-    """
-    statements = null
-    it 'should produce a statement array', ->
-      statements = parser.parse source
-      chai.expect(statements).to.be.an 'array'
-    it 'should include a single CSS part into the array', ->
-      chai.expect(statements).to.eql [
-        ['css',"""
-          h1 {
-            color: red;
-          }""" 
-        ]
-      ]
-        
-
-  describe 'with a top-level CCSS rule', ->
-    source = """
-    #box1[width] >= #box2[width];
-    """
-    statements = null
-    it 'should produce a statement array', ->
-      statements = parser.parse source
-      chai.expect(statements).to.be.an 'array'
-    it 'should include a single CCSS part into the array', ->
-      chai.expect(statements).to.eql [
-        ['ccss',"""
-          #box1[width] >= #box2[width];
-          """ 
-        ]
-      ]
+    expect(parser.parse).to.be.a 'function'
   
-  describe 'CCSS with janky spaces', ->
-    source = """
-    
-    #ed[top] == 0;
-        
-      .box[width] >= 100 <= .box[height];
+  describe "CSS", ->
+  
+    test 'with ruleset', 
+      """
+      h1 {
+        color: red;
+      }
+      """, 
+      [
+        {
+          type:'ruleset'
+          selectors: ['h1']
+          rules: [
+            {
+              type:'style', key:'color', val:'red'
+            }
+          ]
+        }
+      ]
       
-    """
-    statements = null
-    it 'should produce a statement array', ->
-      statements = parser.parse source
-      chai.expect(statements).to.be.an 'array'
-    it 'should include a single CSS part into the array', ->
-      chai.expect(statements).to.eql [
-        ['ccss',"""
-          #ed[top] == 0;
-          """ 
-        ]
-        ['ccss',"""
-          .box[width] >= 100 <= .box[height];
-          """ 
-        ]
+    test 'with @import', 
+      """
+      @import url('bob.css') projection, tv;
+      h1 {
+        color: red;
+      }
+      """, 
+      [
+        {
+          type:'directive'
+          name: 'import'
+          terms: "url('bob.css') projection, tv"
+        }
+        {
+          type:'ruleset'
+          selectors: ['h1']
+          rules: [
+            {
+              type:'style', key:'color', val:'red'
+            }
+          ]
+        }
+      ]
+
+    test 'with nested ruleset', 
+      """
+      .panel, poly-panel + #q22 {
+        color: black;
+        .button {
+          color: white;
+          display: block;
+          
+          /* blah blah */
+          
+          .icon {
+            color: pink;
+          }
+          
+        }
+      }
+      """, 
+      [
+        {
+          type:'ruleset'
+          selectors: ['.panel','poly-panel + #q22']
+          rules: [
+            { type:'style', key:'color', val: 'black' }
+            {
+              type:'ruleset'
+              selectors: ['.button']
+              rules: [
+                { type:'style', key:'color', val: 'white' }
+                { type:'style', key:'display', val: 'block' }
+                {
+                  type:'ruleset'
+                  selectors: ['.icon']
+                  rules: [
+                    { type:'style', key:'color', val: 'pink' }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
       ]
   
   ###
-  describe 'with contextual CCSS rule', ->
-    source = """
-    #box1 {
-      width: >= 100 + ::window[width]/10 !strong;
-    }
-    """
-    statements = null
-    it 'should produce a statement array', ->
-      statements = parser.parse source
-      chai.expect(statements).to.be.an 'array'
-    it 'should include a single CCSS part into the array', ->
-      chai.expect(statements).to.eql [
-        ['ccss',"""
-          ::this[width] >= 100 + ::window[width]/10 this(#box1) !strong;
-          """ 
-        ]
+  describe "gss-prop", ->
+    test 'with ruleset', 
+      """
+      h1 {
+        -gss-translateY: 100px;
+      }
+      """, 
+      [
+        {
+          type:'ruleset'
+          selectors: ['h1']
+          rules: [
+            ['gss-prop','translateY','100px']
+          ]
+        }
       ]
   ###
+  
+  describe "CCSS", ->
+        
+    test 'with a simple CCSS rule',
+      """
+      #box1[width] >= #box2[width] !weak;
+      """,
+      [
+        {type:'constraint', cssText:'#box1[width] >= #box2[width] !weak name(c1);'}
+      ]
+    
+    test 'with a simple CCSS rule with an explicit id',
+      """
+      #box1[width] >= #box2[width] name(box-widths) !strong;
+      """,
+      [
+        {type:'constraint', cssText:"#box1[width] >= #box2[width] name(box-widths) !strong;"}
+      ]
+  
+    test 'CCSS with janky spaces', 
+      """
+    
+      #ed[top] == 0;
+        
+        .box[width] >= 100 <= .box[height] name(box-size) !strong;
+      
+      """,
+      [
+        {type:'constraint', cssText:"#ed[top] == 0 name(c1);"}
+        {type:'constraint', cssText:".box[width] >= 100 <= .box[height] name(box-size) !strong;"}
+      ]
+  
+    test 'with nesting', 
+      """
+      #main {        
+
+          .post {
+            height:== ::parent[height];
+            height:>= ::parent[height] name(blah);
+          }
+        
+      }
+      """,
+      [
+        {
+          type:'ruleset'
+          selectors: ['#main']
+          rules: [
+            {
+              type:'ruleset'
+              selectors: ['.post']
+              rules: [
+                {type:'constraint', cssText:'::[height] == ::parent[height] name(c1);'}
+                {type:'constraint', cssText:'::[height] >= ::parent[height] name(blah);'}
+              ]
+            }
+          ]
+        }
+      ]
 
 
-  describe 'with a CCSS stay rule', ->
-    source = """
-    @-gss-stay #box[width], [grid-height];
-    """
-    statements = null
-    it 'should produce a statement array', ->
-      statements = parser.parse source
-      chai.expect(statements).to.be.an 'array'
-    it 'should include a single CCSS part into the array', ->
-      chai.expect(statements.length).to.equal 1
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'ccss'
-
-  describe 'with a simple VFL rule', ->
-    source = """
-    @horizontal |-[#box1]-[#button1]-| in(#dialog);
-    """
-    statements = null
-    it 'should produce a statement array', ->
-      statements = parser.parse source
-      chai.expect(statements).to.be.an 'array'
-    it 'should include a single VFL part into the array', ->
-      chai.expect(statements.length).to.equal 1
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'vfl'
-
-  describe 'with a simple GTL rule', ->
-    source = """
-    @-gss-layout "frontpageLayout" {
-      grid: "aaab"
-            "aaab"
-            "cccc";
-      place-a: "#box1" "#box1";
-    }
-    """
-    statements = null
-    it 'should produce a statement array', ->
-      statements = parser.parse source
-      chai.expect(statements).to.be.an 'array'
-    it 'should include a single GTL part into the array', ->
-      chai.expect(statements.length).to.equal 1
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'gtl'
-
-  describe 'with mixed CSS, CCSS, VFL, and GTL', ->
-    source = """
-    /* Here we define some constraints */
-    #box1.width >= #box2.width;
-    @horizontal |-[#box1]-[#button1]-| in(#dialog);
-    /* And then we lay it all out */
-    @-gss-layout "frontpageLayout" {
-      grid: "aaab"
-            "aaab"
-            "cccc";
-      place-a: "#box1" "#box1";
-    }
-    /* Finally, make it look nice */
-    h1 {
-      color: red;
-    }
-    """
-    statements = null
-    it 'should produce a statement array', ->
-      statements = parser.parse source
-      chai.expect(statements).to.be.an 'array'
-    it 'it should include four statements', ->
-      chai.expect(statements.length).to.equal 4
-    it 'the first one should be CCSS', ->
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'ccss'
-    it 'the second one should be VFL', ->
-      chai.expect(statements[1]).to.be.an 'array'
-      chai.expect(statements[1].length).to.equal 2
-      chai.expect(statements[1][0]).to.equal 'vfl'
-    it 'the third one should be GTL', ->
-      chai.expect(statements[2]).to.be.an 'array'
-      chai.expect(statements[2].length).to.equal 2
-      chai.expect(statements[2][0]).to.equal 'gtl'
-    it 'the fourth one should be CSS', ->
-      chai.expect(statements[3]).to.be.an 'array'
-      chai.expect(statements[3].length).to.equal 2
-      chai.expect(statements[3][0]).to.equal 'css'
-
-  describe 'with mixed CSS, CCSS, VFL, and GTL. CSS first', ->
-    source = """
-    h1 {
-      color: red;
-    }
-    
-    /* Here we define some constraints */
-    
-    #box1.width >= #box2.width;
-    
-    @horizontal |-[#box1]-[#button1]-| in(#dialog);
-    
-    /* And then we lay it all out */
-    
-    
-    @-gss-layout "frontpageLayout" {
-      grid: "aaab"
-            "aaab"
-            "cccc";
-      place-a: "#box1" "#box1";
-    }
-    """
-    statements = null
-    it 'should produce a statement array', ->
-      statements = parser.parse source
-      chai.expect(statements).to.be.an 'array'
-    it 'it should include four statements', ->
-      chai.expect(statements.length).to.equal 4
-    it 'the first one should be CSS', ->
-      chai.expect(statements[0]).to.be.an 'array'
-      chai.expect(statements[0].length).to.equal 2
-      chai.expect(statements[0][0]).to.equal 'css'
-    it 'the second one should be CCSS', ->
-      chai.expect(statements[1]).to.be.an 'array'
-      chai.expect(statements[1].length).to.equal 2
-      chai.expect(statements[1][0]).to.equal 'ccss'
-    it 'the third one should be VFL', ->
-      chai.expect(statements[2]).to.be.an 'array'
-      chai.expect(statements[2].length).to.equal 2
-      chai.expect(statements[2][0]).to.equal 'vfl'
-    it 'the fourth one should be GTL', ->
-      chai.expect(statements[3]).to.be.an 'array'
-      chai.expect(statements[3].length).to.equal 2
-      chai.expect(statements[3][0]).to.equal 'gtl'
+    test 'with a CCSS stay rule',
+      """
+      @-gss-stay #box[width], [grid-height];
+      """,
+      [
+        {type:'constraint', cssText:"@-gss-stay #box[width], [grid-height] name(c1);"}
+      ]
+  
+  
+  
+  describe "VFL", ->
+  
+    test 'with a simple VFL rule',
+      """
+      @horizontal |-[#box1]-[#button1]-| in(#dialog);
+      """,
+      [
+        {
+          type:'directive'          
+          name: 'horizontal'
+          terms: "|-[#box1]-[#button1]-| in(#dialog)"
+        }
+      ]
   
   describe 'with js layout hooks', ->
     source = """
-    @for-each .box ``` 
-      function(el) {
-        alert('do something!');
-      }
-    ```;
+    @for-each .box ``` function(el) { alert('do something!'); } ``` name(for-boom);
     @horizontal .box gap(10);
     """
     statements = null
     it 'should produce a statement array', ->
       statements = parser.parse source
-      chai.expect(statements).to.be.an 'array'
+      expect(statements).to.be.an 'array'
     it 'should include a single CSS part into the array', ->
-      chai.expect(statements).to.eql [
-        ['ccss',"""
-          @for-each .box ``` 
-            function(el) {
-              alert('do something!');
-            }
-          ```;
-          """ 
-        ],
-        ['vfl', '@horizontal .box gap(10);']
+      expect(statements).to.eql [
+        {
+          "type": "constraint",
+          "cssText": "@for-each .box ``` function(el) { alert('do something!'); } ``` name(for-boom);"
+        },
+        {
+          "type": "directive",
+          "name": "horizontal",
+          "terms": ".box gap(10)"
+        }
       ]
+
+
   
   describe 'with chains', ->
     source = """
@@ -254,8 +244,193 @@ describe 'GSS preparser', ->
     statements = null
     it 'should produce a statement array', ->
       statements = parser.parse source
-      chai.expect(statements).to.be.an 'array'
+      expect(statements).to.be.an 'array'
     it 'should include a single CSS part into the array', ->
-      chai.expect(statements).to.eql [
-        ['ccss', '@chain .big-boxes gap(+[199]!strong);']
+      expect(statements).to.eql [
+        {type:'constraint',cssText:'@chain .big-boxes gap(+[199]!strong) name(c2);'}
       ]
+  
+  
+  describe "End-to-End ~", ->
+    
+    test '@media w/ nesting', 
+      """
+      @media screen and (device-aspect-ratio: 16/9), screen and (device-aspect-ratio: 16/10) {
+      h1[width] >= h2[width];
+      h1 {
+        @vertical .word;
+        color: red;
+        height:== ::parent[height];
+      span, em {
+        color: blue;
+        [gap] >= ::window[width]/10;
+      }
+        }
+      }
+      @horizontal .thought in(.brain);
+      """,
+      [
+        {
+          type: "directive"
+          name: 'media'
+          terms: 'screen and (device-aspect-ratio: 16/9), screen and (device-aspect-ratio: 16/10)'
+          rules: [
+            {type:'constraint',cssText:"h1[width] >= h2[width] name(c1);"}
+            {
+              type: "ruleset"
+              selectors: ['h1']
+              rules: [
+                {type:'directive',name:"vertical",terms:".word"}
+                {type:'style', key:'color', val: 'red'}
+                {type:'constraint',cssText:'::[height] == ::parent[height] name(c2);'}
+                {                  
+                  type: "ruleset"
+                  selectors: ['span','em']
+                  rules: [
+                    {type:'style', key:'color', val: 'blue'}
+                    {type:'constraint',cssText:'[gap] >= ::window[width]/10 name(c3);'}
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        {type:'directive',name:"horizontal",terms:".thought in(.brain)"}
+      ]
+    
+    test '@if @else w/ nesting', 
+      """
+      
+      @horizontal |-[#main]-[#side]-| in(::window) gap([col-size]);
+      60 =< [col-size] <= ::window / 12;
+      
+      #main {        
+        @if ::this[width] >= 960 {
+          @vertical .post gap(40);
+        } 
+        @else ::this[width] > 700 {
+          @vertical .post gap(20);
+        }
+        @else {
+          @vertical .post gap(10);
+          .post {
+            height: <= ::window[height] / 2 !strong;
+            font-size: 14px;
+          }
+        }
+      }
+      
+      """,
+      [
+         {
+            "type": "directive",
+            "name": "horizontal",
+            "terms": "|-[#main]-[#side]-| in(::window) gap([col-size])"
+         },
+         {
+            "type": "constraint",
+            "cssText": "60 =< [col-size] <= ::window / 12 name(c1);"
+         },
+         {
+            "type": "ruleset",
+            "selectors": [
+               "#main"
+            ],
+            "rules": [
+               {
+                  "type": "directive",
+                  "name": "if",
+                  "terms": "::this[width] >= 960",
+                  "rules": [
+                     {
+                        "type": "directive",
+                        "name": "vertical",
+                        "terms": ".post gap(40)"
+                     }
+                  ]
+               },
+               {
+                  "type": "directive",
+                  "name": "else",
+                  "terms": "::this[width] > 700",
+                  "rules": [
+                     {
+                        "type": "directive",
+                        "name": "vertical",
+                        "terms": ".post gap(20)"
+                     }
+                  ]
+               },
+               {
+                  "type": "directive",
+                  "name": "else",
+                  "terms": "",
+                  "rules": [
+                     {
+                        "type": "directive",
+                        "name": "vertical",
+                        "terms": ".post gap(10)"
+                     },
+                     {
+                        "type": "ruleset",
+                        "selectors": [
+                           ".post"
+                        ],
+                        "rules": [
+                           {
+                              "type": "constraint",
+                              "cssText": "::[height] <= ::window[height] / 2 !strong name(c2);"
+                           },
+                           {
+                              "type": "style",
+                              "key": "font-size",
+                              "val": "14px"
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ]
+         }
+      ]
+      
+
+    test 'with mixed CSS, CCSS, VFL',
+      """
+      /* Here we define some constraints */
+      #box1.width >= #box2.width;
+      @horizontal |-[#box1]-[#button1]-| in(#dialog);
+      /* And then we lay it all out */
+      /* Finally, make it look nice */
+      h1 {
+        color: red;
+      }
+      """,
+      [
+        {type:'constraint',cssText:"#box1.width >= #box2.width name(c1);"}
+        {type:'directive', name:'horizontal', terms:"|-[#box1]-[#button1]-| in(#dialog)"}
+        {type:'ruleset', selectors:['h1'],rules:[{type:'style',key:'color',val:'red'}]}
+      ]
+
+    test 'with mixed CSS, CCSS, VFL. CSS first',
+      """
+      h1 {
+        color: red;
+      }
+    
+      /* Here we define some constraints */
+    
+      #box1.width >= #box2.width;
+    
+      /* And then we lay it all out */
+    
+            @horizontal |-[#box1]-[#button1]-| in(#dialog);
+
+      """,
+      [
+        {type:'ruleset', selectors:['h1'],rules:[{type:'style',key:'color',val:'red'}]}
+        {type:'constraint',cssText:"#box1.width >= #box2.width name(c1);"}
+        {type:'directive', name:'horizontal', terms:"|-[#box1]-[#button1]-| in(#dialog)"}        
+      ]
+  
+  
