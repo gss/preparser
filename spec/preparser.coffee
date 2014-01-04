@@ -11,8 +11,8 @@ test = (name,source,target) ->
   statements = null  
   describe name, ->    
     it '/ should parse', ->
-      parser.constraintCount = 0
-      parser.blockCount = 0
+      #parser.constraintCount = 0
+      #parser.blockCount = 0
       statements = parser.parse source
       expect(statements).to.be.an 'array'
     it '/ should parse correctly', ->
@@ -171,7 +171,7 @@ describe 'GSS preparser ~', ->
         
       }
       """,
-      [ 
+      [
         {
           type:'ruleset'
           selectors: ['#main']

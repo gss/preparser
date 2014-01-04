@@ -1,23 +1,6 @@
 {
   var p, parser, flatten, idPrefix; 
   p = parser = this;
-  
-  
-  if (p.blockCount == null) { // shared state for lifetime of parser
-    p.blockCount = 0;
-  }   
-  p.bid = function () {
-    p.blockCount++;
-    return p.blockCount;
-  }
-  
-  if (p.constraintCount == null) { // shared state for lifetime of parser
-    p.constraintCount = 0;
-  }   
-  p.cid = function () {
-    p.constraintCount++;
-    return "c"+p.constraintCount;
-  }    
 
   String.prototype.trim = String.prototype.trim || function trim() { return this.replace(/^\s\s*/, '').replace(/\s\s*$/, ''); };
 
@@ -200,12 +183,14 @@ TextToSemicolon "TextToSemicolon"
 
 _terminators
   = _ LineTerminator* 
-  
-ToEndIdInjector "ToEndIdInjector"
-  = x:(!" name(" [^";"])* ";"  _terminators {return " " + p.stringify(x) + " name(" + p.cid() + ");";}  // inject Name
-  / x:(!" name()" [^";"])* ";" _terminators {p.cid(); return " " + p.stringify(x) + ";";} // valid name
-  / x:[^;]* ";"              _terminators {return     p.error("Invalid Name, must have value",line,column);} // invalid name
 
 LineTerminator "LineTerminator"
   = ([\n\r\u2028\u2029] / "\r\n") _
   / comment 
+  
+/*
+DEPECRECATED_ToEndIdInjector "ToEndIdInjector"
+  = x:(!" name(" [^";"])* ";"  _terminators {return " " + p.stringify(x) + " name(" + p.cid() + ");";}  // inject Name
+  / x:(!" name()" [^";"])* ";" _terminators {p.cid(); return " " + p.stringify(x) + ";";} // valid name
+  / x:[^;]* ";"              _terminators {return     p.error("Invalid Name, must have value",line,column);} // invalid name
+*/
