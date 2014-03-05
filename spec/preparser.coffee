@@ -523,6 +523,9 @@ describe 'GSS preparser ~', ->
   
   describe "Can parse...", ->
     
+    simple = '"box"[right] == "box2"[left];'
+    canParse simple, simple  
+    
     canParse "mixed",    
       """
       @horizontal [#b1][#b2];

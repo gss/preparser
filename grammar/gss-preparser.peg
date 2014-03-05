@@ -164,10 +164,10 @@ space "Space"
   
 
 char "char"
-  = [a-zA-Z0-9_#.\[\]\-]
+  = [a-zA-Z0-9_#.\[\]\-""']
 
 anychar
-  = [a-zA-Z0-9 .,#:+?!^=()_\-$*/\\]
+  = [a-zA-Z0-9 .,#:+?!^=()_\-$*/\\""']
 
 multitoend "multitoend"
   = [^}]* "}" _ LineTerminator*
