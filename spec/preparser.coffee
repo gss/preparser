@@ -17,7 +17,16 @@ test = (name,source,target) ->
       expect(statements).to.be.an 'array'
     it '/ should parse correctly', ->
       expect(statements).to.eql target
-  
+
+canParse = (name,source) ->  
+  statements = null  
+  describe name, ->    
+    it '/ should parse', ->
+      #parser.constraintCount = 0
+      #parser.blockCount = 0
+      statements = parser.parse source
+      expect(statements).to.be.an 'array'
+
 
 describe 'GSS preparser ~', ->
   
@@ -281,7 +290,7 @@ describe 'GSS preparser ~', ->
               selectors: ['h1']
               rules: [
                 {type:'directive',name:"vertical",terms:".word"}
-                {type:'style', key:'color', val: 'red'}
+                {type:'style', key:'color', val:'red'}
                 {type:'constraint',cssText:'::[height] == ::parent[height];'}
                 {                  
                   type: "ruleset"
@@ -298,7 +307,84 @@ describe 'GSS preparser ~', ->
         {type:'directive',name:"horizontal",terms:".thought in(.brain)"}
       ]
     
-    test '@if @else w/ nesting', 
+    
+    test '@if @else w/ nesting & virtuals', 
+      """
+      
+      @horizontal |-["main"]-["side"]-| in("window") gap("col"[size]);
+      60 =< "col"[size] <= "window" / 12;
+      
+      "main" {        
+        @if "this"[width] >= 960 {
+          @vertical .post gap(40);
+        } 
+        @else {
+          "post" {
+            height: <= "window"[height] / 2 !strong;
+            font-size: 14px;
+          }
+        }
+      }
+      
+      """,
+      [
+         {
+            "type": "directive",
+            "name": "horizontal",
+            "terms": '|-["main"]-["side"]-| in("window") gap("col"[size])'
+         },
+         {
+            "type": "constraint",
+            "cssText": '60 =< "col"[size] <= "window" / 12;'
+         },
+         {
+            "type": "ruleset",
+            "selectors": [
+               '"main"'
+            ],
+            "rules": [
+               {
+                  "type": "directive",
+                  "name": "if",
+                  "terms": '"this"[width] >= 960',
+                  "rules": [
+                     {
+                        "type": "directive",
+                        "name": "vertical",
+                        "terms": ".post gap(40)"
+                     }
+                  ]
+               },
+               {
+                  "type": "directive",
+                  "name": "else",
+                  "terms": "",
+                  "rules": [
+                     {
+                        "type": "ruleset",
+                        "selectors": [
+                           '"post"'
+                        ],
+                        "rules": [
+                           {
+                              "type": "constraint",
+                              'cssText': '::[height] <= "window"[height] / 2 !strong;'
+                           },
+                           {
+                              "type": "style",
+                              "key": "font-size",
+                              "val": "14px"
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ]
+         }
+      ]
+      
+      
+    test '@if @else w/ nesting & ', 
       """
       
       @horizontal |-[#main]-[#side]-| in(::window) gap([col-size]);
@@ -432,5 +518,33 @@ describe 'GSS preparser ~', ->
         {type:'constraint',cssText:"#box1.width >= #box2.width;"}
         {type:'directive', name:'horizontal', terms:"|-[#box1]-[#button1]-| in(#dialog)"}        
       ]
+      
+  
+  
+  describe "Can parse...", ->
+    
+    canParse "mixed",    
+      """
+      @horizontal [#b1][#b2];
+    
+      #box[right] == #box2[left];
+    
+      #main {
+      
+        line-height: >= [col-size];
+      
+        @if [target] >= 960 {      
+          width: == [big];
+        }
+        @else [target] >= 500 {      
+          width: == [med];
+        }
+        @else {      
+          right: == ::window[left];
+        }
+        
+      }
+      
+      """
   
   
