@@ -1,7 +1,7 @@
 {
   "name": "gss-preparser",
   "description": "GSS preparser",
-  "version": "1.0.1beta",
+  "version": "1.0.2beta",
   "repository": {
     "type": "git",
     "url": "git://github.com/the-gss/preparser.git"
