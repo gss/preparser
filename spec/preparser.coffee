@@ -53,6 +53,24 @@ describe 'GSS preparser ~', ->
         }
       ]
       
+    test 'with adv ruleset', 
+      """
+      html [strange=true] * > .box {
+        color: red;
+      }
+      """, 
+      [
+        {
+          type:'ruleset'
+          selectors: ['html [strange=true] * > .box']
+          rules: [
+            {
+              type:'style', key:'color', val:'red'
+            }
+          ]
+        }
+      ]
+      
     test 'with @import', 
       """
       @import url('bob.css') projection, tv;
@@ -526,6 +544,12 @@ describe 'GSS preparser ~', ->
     simple = '"box"[right] == "box2"[left];'
     canParse simple, simple  
     
+    
+    canParse "VGL",
+      """
+        @grid-template simple "ab";
+      """
+    
     canParse "mixed",    
       """
       @horizontal [#b1][#b2];
@@ -548,6 +572,368 @@ describe 'GSS preparser ~', ->
         
       }
       
+      """
+    
+    canParse "big dump", 
+      """
+    
+      [grid] == 36;
+      [grid2] == 72;
+    
+      [hgap] == [grid2];
+    
+      [leftline]  == #wiz-scope[left] + [grid2];
+      [rightline] == #wiz-scope[right] - [grid2];
+    
+      /* panel */
+        [panel-width] ==[grid2] * 9 !strong;
+        [panel-height] >= 620 !strong;
+        .admin-bg[width] == [panel-width] + 20;
+        .admin-bg[height] == [panel-height] + 20;
+        .admin-panel[width] == [panel-width];
+        .admin-panel[height] == [panel-height];
+        .admin-panel[center-x] == ::window[center-x] !strong;
+        .admin-panel[top] == [grid2] * 2 !strong;
+        .admin-bg[center-x] == ::window[center-x] !strong;
+        .admin-bg[top] == 125 !strong;
+      
+    
+      /* header */
+        .admin-header[center-x] == #wiz-scope[center-x] !strong;        
+        /*.admin-header[height] == .admin-header[intrinsic-height];  bug when display:none */
+        .admin-header[height] == [grid2] * 2;
+        .admin-header[width] <= 500;
+    
+    
+      /* sections */    
+    
+        @vertical |[#admin-header-signup]-[#wiz-section-top][#wiz-section-mid][#wiz-section-bot]-120-| 
+          gap([grid2]) in(#wiz-scope);
+    
+        @horizontal |[.wiz-section]|
+           in(#wiz-scope);
+         
+        .wiz-section[height] >= [grid2];
+         
+        .sup-circ[width] == .sup-circ[height]        
+          == 2;
+        1 == .sup-circ[border-radius];
+        
+        .sup-circ {
+          background-color: white;
+        }
+      
+        .sup-circ-lead[left] == #wiz-scope[left];            
+        .sup-circ-tail[right] == #wiz-scope[right];        
+        .sup-circ-top[center-y] == #wiz-section-top[top];
+        .sup-circ-mid[center-y] == #wiz-section-mid[top];
+        .sup-circ-mid2[center-y] == #wiz-section-mid[center-y];
+        .sup-circ-mid22[center-y] == #wiz-section-mid2[top];                        
+        
+      /* top section */
+                
+        @horizontal |[#sup-plan-image(==[grid2])][#sup-plan-info]|
+          in(#wiz-section-top);
+        @vertical |[#sup-plan-image]|
+          in(#wiz-section-top);        
+        
+        @horizontal |[#sup-plan-edit]-|
+          gap([grid] / 2)
+          in(#wiz-section-top);
+        @vertical |[#sup-plan-edit]|
+          in(#wiz-section-top);
+      
+        #sup-plan-info[height] == #sup-plan-info[line-height]
+          == #sup-plan-edit[line-height] == #sup-plan-edit[height]; 
+              
+      
+      
+    
+      /* mid2 section */
+    
+        @vertical |-[#wiz-section-mid2]|
+          gap([grid2])
+          in(#wiz-section-mid);
+        
+      /* user */
+    
+        #wiz-user-img[width] == #wiz-user-img[height]
+          == [grid] + 3;
+        #wiz-user-img[border-radius] == [grid] * 2;
+      
+        #wiz-user-img[center-y] == #wiz-section-top[center-y] + #wiz-section-top[height];
+        #wiz-user-img[center-x] == #wiz-section-top[left] + [grid];
+      
+        #wiz-user-img {
+          background-color: white;
+          border: 2px solid hsl(0, 0%, 0%);
+          box-shadow: 0 0 0 1px hsl(190, 90%, 50%);
+        }
+      
+        @horizontal [#wiz-user-img]-[#wiz-user-info][#wiz-user-edit(==[grid2])]-|
+          gap([grid]/2)
+          chain-center-y
+          in(#wiz-section-top);
+        #wiz-user-info[height] == #wiz-user-info[line-height]
+          == [grid];
+        #wiz-user-edit[height] == #wiz-user-edit[line-height]
+          == [grid];
+        
+    
+      /* bottom section */
+  
+        @vertical |-[.wiz-but-next]-|
+          gap([grid])
+          in(#wiz-section-bot);
+        .wiz-but-next[width] == [grid2] * 2;
+        .wiz-but-next[height] == [grid2];
+        .wiz-but-next[center-x] == #wiz-section-bot[center-x];
+      
+    
+      
+      
+      
+      /* mid section */
+            
+        @horizontal |-[#sup-services]-|
+          in(#wiz-section-mid);     
+        
+        #sup-services[height] == [grid2];
+    
+        @horizontal |-3-[#sup-github]-18-[#sup-twitter]-6-|
+          gap([grid2]) in(#sup-services)
+          chain-top chain-width chain-height;
+        
+        @vertical |-3-[#sup-github]-5-|          
+          in(#sup-services);
+      
+        @horizontal |-[#sup-email-label]-|
+          in(#wiz-section-mid);
+      
+        @horizontal |-[#sup-email]-|
+          in(#wiz-section-mid);
+            
+        @vertical |-[#sup-services-label]-18-[#sup-services]-36-[#sup-email-label]-18-[#sup-email]-| 
+          gap([sup-mid-gap])
+          in(#wiz-section-mid);
+          [sup-mid-gap] >= [grid];
+      
+        #sup-services-label[height] == [grid];
+        #sup-email-label[height] == [grid];
+        #sup-email[height] == [grid2];
+      
+        #sup-logout {
+          position: absolute;
+          top: 3px;
+          right: 3px;
+          left: 3px;
+          bottom: 3px;
+        }
+      
+        .sup-service {
+          border: none; /* 1px solid hsla(220, 20%, 84%, 0);*/
+          -moz-border-radius: 8px;
+          -webkit-border-radius: 8px;
+          border-radius: 8px;
+          background-color: hsla(0, 0%, 0%, 0);
+          color: hsl(0, 100%, 100%);
+          font-weight: bold;
+          font-size: 16px;
+        }
+        .sup-service:hover, .sup-service.selected {
+          background-color: hsla(190, 100%, 50%, .8);
+          color: hsl(0, 100%, 0%);
+        }
+        .sup-service i {
+          margin-right: 16px;
+          font-size: 18px;
+        }
+      
+        .sup-state {
+          display:none;
+        }
+        html [data-sup-state="login"] .sup-state-login {
+          display: block;
+        }
+        html [data-sup-state="logout"] .sup-state-logout {
+          display: block;
+        }
+    
+    
+    
+    
+    
+
+      /* payment types */
+        @horizontal |[#pay-type1][#pay-type2]| in(#form-payment) gap([grid]) 
+          chain-width chain-top;
+        .pay-type[height] == [grid2];  
+        .pay-type[line-height] == [grid2];
+  
+      /* form */          
+        /*#form-payment[top] == #admin-buy[center-y];*/
+      
+        [subgrid] == [grid] * 1.5;
+      
+        input[height] == [subgrid] !strong;
+        output[height] == [subgrid] !strong;
+        label[height] == [subgrid] == label[line-height] !strong;
+        input[width] >= [subgrid] !strong;
+      
+        [inputs-left] == #form-payment[left] + 144;
+        @horizontal |[#label-card]-[#input-card]| 
+          in(#form-payment) gap(9) chain-top chain-height;
+        #input-card[x] == [inputs-left]; /* :first */
+        @horizontal |[#label-exp][#input-month(==[grid2])]-18-[#input-year(==[grid2])]~[#label-cvc]-18-[#input-cvc(==[grid2])]| 
+          in(#form-payment) gap(18) chain-top chain-bottom;
+        #input-month[x] == [inputs-left]; /* :first */
+      
+        @horizontal |[#output-card(==[subgrid])]
+          in(#input-card);
+        #output-card[top] == #input-card[top];
+      
+        @vertical |-[#input-card]-36-[#input-month]-| 
+          in(#form-payment) 
+          gap([pay-input-gap]);
+        [pay-input-gap] >= [grid];
+    
+        #input-month {
+          border-radius-right: 0;
+        }
+        #input-year {
+          border-radius-left: 0;
+        }
+        
+      /* bc qr code */
+    
+        @vertical |-18-[#qrcode]-[#qrcode-link]~|
+          in(#form-payment)
+          gap([grid] / 2);
+        #qrcode[width] == #qrcode[height];
+        #qrcode[center-x] == #form-payment[center-x];
+        @horizontal |[#qrcode-link]|
+          in(#form-payment);
+        #qrcode-link[height] == #qrcode-link[line-heigt]
+          == [grid];
+        #qrcode {
+          background-color: white;
+        }
+    
+      /* bc price */
+    
+      @vertical |[#bc-price]|
+        in(#form-payment);
+      @horizontal |[#bc-price]|
+        in(#form-payment);
+      #bc-price[line-height] == #bc-price[height];
+    
+      /* loader */
+    
+        @horizontal |-[#form-pay-loader]-|
+          in(#form-payment)
+          gap([grid]);
+        @vertical |-[#form-pay-loader]
+          in(#form-payment)
+          gap([grid2]);
+              
+
+  
+      /* layout */          
+        /*@vertical [#admin-header-buy]-[#pay-type1]-[#form-payment]~80~[#pay-footer]| gap(40) in(#admin-buy);*/
+            
+        @vertical |-[#pay-type1]-18-[#form-payment]-|
+          in(#wiz-section-mid2) 
+          gap([pay-mid-gap]);
+          [pay-mid-gap] >= [grid];
+      
+        @horizontal |-[#form-payment]-| in(#wiz-section-mid) gap([grid2]);
+      
+      
+      
+      
+            
+        #label-cvc{
+          text-align:right;
+        }
+        #output-card {        
+          background-position: 50% 50%;
+          background-repeat: no-repeat;
+        }
+        #output-card.Visa {
+          background-image: url('../assets/icon-visa.png');
+        }
+        #output-card.Mastercard {
+          background-image: url('../assets/icon-mastercard.png');
+        }
+        #output-card.Amex {
+          background-image: url('../assets/icon-amex.png');
+        }
+        .pay-type {
+          opacity: .3;
+          text-align:center;
+        }
+      
+        .pay-type:not(.selected):hover {
+          opacity: 1;
+        }
+        #pay-type1 {
+          border-right: 1px solid hsla(192, 90%, 92%,.1);
+        }
+        html [data-pay-state="cc"] #pay-type1 {
+          opacity: 1;
+          color: hsl(190, 100%, 50%);
+        }
+        html [data-pay-state="bc"] #pay-type2, html [data-pay-state="bcqr"] #pay-type2 {
+          opacity: 1;
+          color: hsl(190, 100%, 50%);
+        }
+        .form-pay-state {
+          display: none;
+        }
+        html [data-pay-state="cc"] .form-pay-state-cc {
+          display: block;
+        }
+        html [data-pay-state="bc"] .form-pay-state-bc {
+          display: block;
+        }
+        html [data-pay-state="bcqr"] .form-pay-state-bcqr {
+          display: block;
+        }
+        html [data-pay-state="loading"] .form-pay-state-loading {
+          display: block;
+        }
+      
+      
+      
+      
+        /* thanks */
+        @horizontal .thanks-icon gap([grid]);
+      
+        @vertical |-72-[#thanks-title(==[grid])]-[.thanks-icon]
+          in(#wiz-section-mid)
+          gap([grid]);
+      
+        @horizontal |-[#thanks-title]-|
+          in(#wiz-section-mid)
+          gap([grid]);
+      
+        .thanks-icon[width] == 60;
+        .thanks-icon[height] == 60;
+        .thanks-icon[border-radius] == 30;      
+        .thanks-icon[left] >= #wiz-section-mid[left] + [thanks235];
+        .thanks-icon[right] <= #wiz-section-mid[right] - [thanks235];
+
+          .thanks-icon {
+          text-align: center;
+          background-color: hsl(190, 100%, 50%);
+          color: hsl(0, 0%, 0%);
+          text-shadow: none;
+          font-size: 24px;
+          line-height: 48px;
+          border: 6px solid hsl(0, 0%, 0%);
+          box-shadow: 0 0 0 2px hsla(190, 100%, 90%, 0.1);
+          box-sizing: border-box;
+          }
       """
   
   

@@ -142,7 +142,7 @@ SelectorListEnd
   = _ "," $:Selector {return $}
 
 Selector "Selector"
-  = _ $:[^@{}\[\],;]+ _ {return $.join("").trim()}
+  = _ $:[^@{},;]+ _ {return $.join("").trim()}
 
 
 
