@@ -577,6 +577,7 @@ describe 'GSS preparser ~', ->
     canParse "small dump", 
       """
       [md] * 4 == [w] - [ogap] * 2 !require;
+      ([md] * 4) / 2 == ([w] - [ogap] * 2) / 2 !require;
       """
     
     canParse "big dump", 
