@@ -77,7 +77,7 @@ gssBlob
 
 
 ccss "CCSS"
-  = ccss:(_ char+ _ ccssOp anytoend)  { 
+  = ccss:(_ [a-zA-Z0-9_#.\[\]\-""' *+/$^~%\\]+ _ ccssOp anytoend)  { 
     return {type:'constraint', cssText: p.stringify(ccss)}; 
   }
   / stay:( _ "@" ("-gss-")? "stay" anytoend)    { 
@@ -161,10 +161,6 @@ space "Space"
   = " "
   / [\t]
   / [\u00A0] //NO-BREAK SPACE
-  
-
-char "char"
-  = [a-zA-Z0-9_#.\[\]\-""']
 
 anychar
   = [a-zA-Z0-9 .,#:+?!^=()_\-$*/\\""']

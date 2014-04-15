@@ -573,10 +573,39 @@ describe 'GSS preparser ~', ->
       }
       
       """
+
+    canParse "small dump", 
+      """
+      [md] * 4 == [w] - [ogap] * 2 !require;
+      """
     
     canParse "big dump", 
       """
-    
+      
+      .asterisk { 
+        color: hsl(190,100%,50%); 
+      }
+      
+      .dot[width] == 2 == .dot[height];
+      .dot[border-radius] == 1;
+      @horizontal .dot-row1 gap([plan-width]-2);
+      @horizontal .dot-row2 gap([plan-width]-2);
+      @horizontal .dot-row3 gap([plan-width]-2);
+      @horizontal .dot-row4 gap([plan-width]-2);
+      @horizontal .dot-row5 gap([plan-width]-2);
+      @horizontal .dot-row6 gap([plan-width]-2);
+      .dot-first[center-x] == #p1[left];
+      .dot-row1[center-y] == #p-r1[top];
+      .dot-row2[center-y] == #p-r2[top];
+      .dot-row3[center-y] == #p-r3[top];
+      .dot-row4[center-y] == #p-r4[top];
+      .dot-row5[center-y] == #p-r5[top];
+      .dot-row6[center-y] == #p-r5[bottom];
+      
+      .asterisk { 
+        color: hsl(190,100%,50%); 
+      }
+      
       [grid] == 36;
       [grid2] == 72;
     
