@@ -219,6 +219,7 @@ describe 'GSS preparser ~', ->
       """
         selector {
             width: == ::[intrinsic-width];
+            width : == ::[intrinsic-width];
             ::[width] == ::[intrinsic-width];
         }
       """,
@@ -227,6 +228,7 @@ describe 'GSS preparser ~', ->
           type:'ruleset'
           selectors: ['selector']
           rules: [
+            {type:'constraint', cssText:'::[width] == ::[intrinsic-width];'}
             {type:'constraint', cssText:'::[width] == ::[intrinsic-width];'}
             {type:'constraint', cssText:'::[width] == ::[intrinsic-width];'}
           ]
