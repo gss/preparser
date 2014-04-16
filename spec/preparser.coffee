@@ -214,6 +214,24 @@ describe 'GSS preparser ~', ->
           ]
         }
       ]
+    
+    test 'contextual w/ left-handed ::',
+      """
+        selector {
+            width: == ::[intrinsic-width];
+            ::[width] == ::[intrinsic-width];
+        }
+      """,
+      [
+        {
+          type:'ruleset'
+          selectors: ['selector']
+          rules: [
+            {type:'constraint', cssText:'::[width] == ::[intrinsic-width];'}
+            {type:'constraint', cssText:'::[width] == ::[intrinsic-width];'}
+          ]
+        }
+      ]
 
 
     test 'with a CCSS stay rule',

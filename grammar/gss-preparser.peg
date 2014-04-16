@@ -77,7 +77,7 @@ gssBlob
 
 
 ccss "CCSS"
-  = ccss:(_ [a-zA-Z0-9_#.\[\]\-""' *+/$^~%\\()]+ _ ccssOp anytoend)  { 
+  = ccss:(_ ccssStartChar+ _ ccssOp anytoend)  { 
     return {type:'constraint', cssText: p.stringify(ccss)}; 
   }
   / stay:( _ "@" ("-gss-")? "stay" anytoend)    { 
@@ -89,13 +89,16 @@ ccss "CCSS"
   / forlooper:( _ "@" ("-gss-")? ("for-each" / "for-all") [^`]+ "```" [^`]+ "```" anytoend) { 
     return {type:'constraint', cssText: p.stringify(forlooper)}; 
   }
-  
+
+ccssStartChar
+  = [a-zA-Z0-9_#.\[\]\-""' *+/$^~%\\()~]
+  / "::" 
 
 ccssOp
   = ">=" / "==" / "<=" / "=>" / "=<"
 
 ContextualCCSSLine "Contextual CCSS Statement"
-  = _ prop:[a-zA-Z0-9\-_$]+ ":" _ op:ccssOp tail:anytoend  {
+  = _ prop:[a-zA-Z0-9\-_$]+ _ ":" _ op:ccssOp tail:anytoend  {
       return {type:'constraint', cssText: "::["+p.trim(prop)+"]"+" "+op+" "+p.stringify(tail)};
     }
 
@@ -112,8 +115,8 @@ cssBlock
   = block:(anychar+ multitoend)    { return ['css', parser.stringify(block)]; }
 
 Ruleset "Ruleset"
-  = _ $:SelectorList s:BlockedStatements {
-    return {type:'ruleset',selectors:$,rules:s};
+  = _ sel:SelectorList s:BlockedStatements {
+    return {type:'ruleset',selectors:sel,rules:s};
   }
   
 Directive "Directive"
@@ -136,13 +139,13 @@ BlockedStatements "Statement Blocks"
   = _  "{" _ s:nestedStatements _ "}" _ LineTerminator* {return s;}
 
 SelectorList "SelectorList"
-  = $:Selector $s:SelectorListEnd* {return [$].concat($s)}
+  = sel:Selector sels:SelectorListEnd* {return [sel].concat(sels)}
 
 SelectorListEnd
-  = _ "," $:Selector {return $}
+  = _ "," sel:Selector {return sel}
 
 Selector "Selector"
-  = _ $:[^@{},;]+ _ {return $.join("").trim()}
+  = _ sel:[^@{},;]+ _ {return sel.join("").trim()}
 
 
 
