@@ -1,8 +1,8 @@
-if typeof process is 'object' and process.title is 'node'
+if window?
+  parser = require 'gss-preparser'
+else
   chai = require 'chai' unless chai
   parser = require '../lib/gss-preparser'
-else
-  parser = require 'gss-preparser'
 
 expect = chai.expect
 
