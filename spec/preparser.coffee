@@ -164,9 +164,17 @@ describe 'GSS preparser ~', ->
       """,
       [
         {type:'constraint', cssText:'#box1[width] >= #box2[width] !weak;'}
-      ]
+      ]      
     
-    test 'with a simple CCSS rule with an explicit id',
+    test 'with a simple CCSS rule',
+      """
+      (section.section div:not(.b))[x] == (section.section div:not(.a))[x] == [x];
+      """,
+      [
+        {type:'constraint', cssText:'(section.section div:not(.b))[x] == (section.section div:not(.a))[x] == [x];'}
+      ]    
+    
+    test 'with a simple CCSS rule and function',
       """
       #box1[width] >= #box2[width] name(box-widths) !strong;
       """,

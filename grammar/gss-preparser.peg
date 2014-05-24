@@ -71,7 +71,7 @@ nestedStatements
 
 gssBlob
   = ccss  
-
+  
   // gtl
   // vfl
 
@@ -92,7 +92,9 @@ ccss "CCSS"
 
 ccssStartChar
   = [a-zA-Z0-9_#.\[\]\-""' *+/$^~%\\()~]
-  / "::" 
+  // have to specially handle colons
+  / "::"
+  / ":" [a-zA-Z0-9_\-]+ "(" // for pseudo selectors
 
 ccssOp
   = ">=" / "==" / "<=" / "=>" / "=<"

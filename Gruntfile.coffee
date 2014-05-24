@@ -5,9 +5,9 @@ module.exports = ->
 
     # Generate library from Peg grammar
     peg:
-      fbp:
-        grammar: 'grammar/gss-preparser.peg'
-        outputFile: 'lib/gss-preparser.js'
+      preparser:
+        src: 'grammar/gss-preparser.peg'
+        dest: 'lib/gss-preparser.js'
 
     # Build the browser Component
     component_build:
