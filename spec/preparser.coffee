@@ -2,9 +2,9 @@ if window?
   parser = require 'gss-preparser'
 else
   chai = require 'chai' unless chai
-  parser = require '../lib/gss-preparser'
+  parser = require '../lib/preparser'
 
-expect = chai.expect
+{expect} = chai
 
 
 test = (name,source,target) ->  
