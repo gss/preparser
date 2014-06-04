@@ -7,21 +7,29 @@ else
 {expect} = chai
 
 
-test = (name,source,target) ->  
-  statements = null  
-  describe name, ->    
-    it '/ should parse', ->
+test = (name, source, target, pending) ->
+  itFn = if pending then xit else it
+
+  describe name, ->
+    statements = null
+
+    itFn '/ should parse', ->
       #parser.constraintCount = 0
       #parser.blockCount = 0
       statements = parser.parse source
       expect(statements).to.be.an 'array'
-    it '/ should parse correctly', ->
+
+    itFn '/ should parse correctly', ->
       expect(statements).to.eql target
 
-canParse = (name,source) ->  
-  statements = null  
-  describe name, ->    
-    it '/ should parse', ->
+
+canParse = (name, source, pending) ->
+  itFn = if pending then xit else it
+
+  describe name, ->
+    statements = null
+
+    itFn '/ should parse', ->
       #parser.constraintCount = 0
       #parser.blockCount = 0
       statements = parser.parse source
