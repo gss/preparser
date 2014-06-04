@@ -38,7 +38,7 @@ canParse = (name, source, pending) ->
 
 # Helper function for expecting errors to be thrown when parsing.
 #
-# @param source [String] A GSS expression.
+# @param source [String] GSS statements.
 # @param message [String] This should be provided when a rule exists to catch
 # invalid syntax, and omitted when an error is expected to be thrown by the PEG
 # parser.
