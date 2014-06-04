@@ -5,7 +5,7 @@ module.exports = ->
 
     # Generate library from Peg grammar
     peg:
-      preparser:
+      parser:
         src: 'src/grammar.peg'
         dest: 'lib/parser.js'
 
