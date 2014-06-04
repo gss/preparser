@@ -30,5 +30,5 @@
   "scripts": {
     "test": "grunt test"
   },
-  "main": "./lib/gss-preparser"
+  "main": "./lib/preparser"
 }
