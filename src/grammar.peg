@@ -33,14 +33,6 @@
     if (x instanceof Array) {return x.join("").trim();}
     return ""
   };
-  
-  parser.error = function (m,l,c) {
-    if (!!l && !!c) {
-      m = m + " {line:" + l + ", col:" + c + "}";
-    }
-    console.error(m);
-    return m;
-  };
 
 }
 

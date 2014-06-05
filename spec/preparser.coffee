@@ -2,30 +2,58 @@ if window?
   parser = require 'gss-preparser'
 else
   chai = require 'chai' unless chai
-  parser = require '../lib/gss-preparser'
+  parser = require '../lib/preparser'
 
-expect = chai.expect
+{expect} = chai
 
 
-test = (name,source,target) ->  
-  statements = null  
-  describe name, ->    
-    it '/ should parse', ->
+test = (name, source, target, pending) ->
+  itFn = if pending then xit else it
+
+  describe name, ->
+    statements = null
+
+    itFn '/ should parse', ->
       #parser.constraintCount = 0
       #parser.blockCount = 0
       statements = parser.parse source
       expect(statements).to.be.an 'array'
-    it '/ should parse correctly', ->
+
+    itFn '/ should parse correctly', ->
       expect(statements).to.eql target
 
-canParse = (name,source) ->  
-  statements = null  
-  describe name, ->    
-    it '/ should parse', ->
+
+canParse = (name, source, pending) ->
+  itFn = if pending then xit else it
+
+  describe name, ->
+    statements = null
+
+    itFn '/ should parse', ->
       #parser.constraintCount = 0
       #parser.blockCount = 0
       statements = parser.parse source
       expect(statements).to.be.an 'array'
+
+
+# Helper function for expecting errors to be thrown when parsing.
+#
+# @param source [String] GSS statements.
+# @param message [String] This should be provided when a rule exists to catch
+# invalid syntax, and omitted when an error is expected to be thrown by the PEG
+# parser.
+# @param pending [Boolean] Whether the spec should be treated as pending.
+#
+expectError = (source, message, pending) ->
+  itFn = if pending then xit else it
+
+  describe source, ->
+    predicate = 'should throw an error'
+    predicate = "#{predicate} with message: #{message}" if message?
+
+    itFn predicate, ->
+      exercise = -> parser.parse source
+      expect(exercise).to.throw Error, message
 
 
 describe 'GSS preparser ~', ->

@@ -7,11 +7,12 @@
   "json": [
     "component.json"
   ],
-  "remotes": [
-    "https://raw.githubusercontent.com"
-  ],  
   "scripts": [
-    "lib/gss-preparser.js"
+    "lib/parser.js",
+    "lib/preparser.js"
   ],
-  "main": "lib/gss-preparser.js"
+  "dependencies": {
+    "the-gss/error-reporter": "*"
+  },
+  "main": "lib/preparser.js"
 }

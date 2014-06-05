@@ -5,15 +5,17 @@ module.exports = ->
 
     # Generate library from Peg grammar
     peg:
-      preparser:
-        src: 'grammar/gss-preparser.peg'
-        dest: 'lib/gss-preparser.js'
+      parser:
+        src: 'src/grammar.peg'
+        dest: 'lib/parser.js'
 
     # Build the browser Component
-    component_build:
+    componentbuild:
       'gss-preparser':
-        output: './browser/'
-        config: './component.json'
+        options:
+          name: 'gss-preparser'
+        src: '.'
+        dest: 'browser'
         scripts: true
         styles: false
 
@@ -21,32 +23,42 @@ module.exports = ->
     uglify:
       options:
         report: 'min'
-      noflo:
+      'gss-preparser':
         files:
           './browser/gss-preparser.min.js': ['./browser/gss-preparser.js']
 
     # Automated recompilation and testing when developing
     watch:
       build:
-        files: ['spec/*.coffee', 'grammar/*.peg']
+        files: ['spec/**/*.coffee', 'src/**/*.{coffee,peg}']
         tasks: ['build']
       test:
-        files: ['spec/*.coffee', 'grammar/*.peg']
+        files: ['spec/**/*.coffee', 'src/**/*.{coffee,peg}']
         tasks: ['test']
 
     # BDD tests on Node.js
     cafemocha:
       nodejs:
-        src: ['spec/*.coffee']
+        src: ['spec/**/*.coffee']
+      options:
+        reporter: 'spec'
 
     # CoffeeScript compilation
     coffee:
+      src:
+        options:
+          bare: true
+        expand: true
+        cwd: 'src'
+        src: ['**/*.coffee']
+        dest: 'lib'
+        ext: '.js'
       spec:
         options:
           bare: true
         expand: true
         cwd: 'spec'
-        src: ['**.coffee']
+        src: ['**/*.coffee']
         dest: 'spec'
         ext: '.js'
 
@@ -65,6 +77,6 @@ module.exports = ->
   @loadNpmTasks 'grunt-mocha-phantomjs'
   @loadNpmTasks 'grunt-contrib-watch'
 
-  @registerTask 'build', ['peg', 'coffee', 'component_build', 'uglify']
-  @registerTask 'test', ['build', 'cafemocha', 'mocha_phantomjs']
+  @registerTask 'build', ['coffee:src', 'peg', 'componentbuild', 'uglify']
+  @registerTask 'test', ['build', 'coffee:spec', 'cafemocha', 'mocha_phantomjs']
   @registerTask 'default', ['build']
